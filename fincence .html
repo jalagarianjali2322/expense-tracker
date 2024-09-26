@@ -1,0 +1,129 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal Finance Manager</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    button {
+    padding: 10px;
+    width: 20%;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+button:hover {
+    background-color: #218838;
+}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Personal Finance Manager</h1>
+    <div class="balance">
+      <h2>Balance: <span id="balance">$100.00</span></h2>
+    </div>
+    <form id="transactionForm">
+      <label for="transactionType">Transaction Type:</label>
+      <select id="transactionType">
+        <option value="income">Income</option>
+        <option value="expense">Expense</option>
+      </select>
+      <label for="amount">Amount:</label>
+      <input type="number" id="amount" placeholder="Enter amount">
+      <label for="category">Category:</label>
+      <input type="text" id="category" placeholder="Enter category">
+    
+      <button type="submit">Add Transaction</button>
+    </form>
+    <div id="transactionList" class="transaction-list">
+      <h2>Transaction History</h2>
+      <!-- Transactions will be displayed here -->
+    </div>
+<div>
+    <button class="btn"><b>Desprition</b></button>
+    <button class="btn"><b>amount<b></button>
+    <button class="btn"><b>Type</b></button>
+    <button class="btn"><b>Action</b></button>
+    
+</div>
+      </div>
+    </div>
+  </div>
+  <script src="script.js"></script>
+  <script>
+    let balance = 100;
+const transactions = [];
+
+function displayBalance() {
+  document.getElementById('balance').textContent = '$' + balance.toFixed(2);
+}
+
+function addTransaction(type, amount, category) {
+  transactions.push({ type, amount, category });
+  const transactionList = document.getElementById('transactionList');
+  const transaction = document.createElement('div');
+  transaction.className = type;
+  transaction.innerHTML = `<strong>${type.charAt(0).toUpperCase() + type.slice(1)}:</strong> $${amount.toFixed(2)} (${category})`;
+  transactionList.appendChild(transaction);
+  updateInsights();
+}
+
+function updateInsights() {
+  const expenseTotal = transactions.reduce((total, transaction) => {
+    return transaction.type === 'expense' ? total + transaction.amount : total;
+  }, 0);
+  document.getElementById('expenseTotal').textContent = `Total Expenses: $${expenseTotal.toFixed(2)}`;
+
+  const categoryTotals = {};
+  transactions.forEach(transaction => {
+    if (transaction.type === 'expense') {
+      if (!categoryTotals[transaction.category]) {
+        categoryTotals[transaction.category] = 0;
+      }
+      categoryTotals[transaction.category] += transaction.amount;
+    }
+  });
+
+  const categoryTotalsDiv = document.getElementById('categoryTotals');
+  categoryTotalsDiv.innerHTML = '';
+  for (const category in categoryTotals) {
+    const categoryTotal = categoryTotals[category];
+    const categoryTotalElement = document.createElement('p');
+    categoryTotalElement.textContent = `${category}: $${categoryTotal.toFixed(2)}`;
+    categoryTotalsDiv.appendChild(categoryTotalElement);
+  }
+}
+
+document.getElementById('transactionForm').addEventListener('submit', function(event) {
+  event.preventDefault();
+  const transactionType = document.getElementById('transactionType').value;
+  const amount = parseFloat(document.getElementById('amount').value);
+  const category = document.getElementById('category').value.trim();
+  if (isNaN(amount) || amount <= 0 || category === '') {
+    alert('Please enter a valid amount and category.');
+    return;
+  }
+  if (transactionType === 'expense' && amount > balance) {
+    alert('You do not have sufficient funds.');
+    return;
+  }
+  if (transactionType === 'income') {
+    balance += amount;
+  } else {
+    balance -= amount;
+  }
+  displayBalance();
+  addTransaction(transactionType, amount, category);
+});
+
+displayBalance();
+updateInsights();
+
+  </script>
+</body>
+</html>
